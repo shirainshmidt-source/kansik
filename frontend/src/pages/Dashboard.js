@@ -124,54 +124,114 @@ function Dashboard({ user, onLogout }) {
         <div className="empty-state">
           <div className="icon">📋</div>
           <p>אין דוחות עדיין</p>
-          <p style={{ marginTop: 8, fontSize: "0.9rem" }}>לחץ + כדי לסרוק דוח חדש</p>
+          <p style={{ marginTop: 8, fontSize: "0.9rem" }}>לחצי + כדי לסרוק דוח חדש</p>
         </div>
       ) : (
         tickets.map((ticket) => {
-          const badge = getStatusBadge(ticket);
+          const isOverdue = ticket.days_until_payment !== null && ticket.days_until_payment < 0 && ticket.status !== "paid";
+          const isPaymentUrgent = ticket.days_until_payment !== null && ticket.days_until_payment >= 0 && ticket.days_until_payment <= 7;
+          const isAppealUrgent = ticket.days_until_appeal !== null && ticket.days_until_appeal >= 0 && ticket.days_until_appeal <= 7;
+          const hasUrgent = isPaymentUrgent || isAppealUrgent;
+
+          const borderColor = isOverdue ? "#A32D2D" : hasUrgent ? "#BA7517" : "transparent";
+
+          // חישוב סכום
+          let displayAmount = ticket.amount_updated || ticket.amount_original || 0;
+          let estimatedExtra = null;
+          if (isOverdue && !ticket.amount_updated && ticket.amount_original) {
+            const estimated = estimateOverdue(ticket.amount_original, Math.abs(ticket.days_until_payment));
+            estimatedExtra = estimated - ticket.amount_original;
+            displayAmount = estimated;
+          }
+
           return (
             <div
               key={ticket.id}
-              className="ticket-card"
+              style={{
+                background: "white",
+                borderRadius: 12,
+                padding: "16px",
+                marginBottom: 8,
+                cursor: "pointer",
+                border: "1px solid #e8ecf2",
+                borderRight: borderColor !== "transparent" ? `3px solid ${borderColor}` : "1px solid #e8ecf2",
+                transition: "all 0.15s",
+              }}
               onClick={() => navigate(`/ticket/${ticket.id}`)}
             >
-              <div className="top-row">
-                <span className="municipality">{ticket.municipality || "דוח"}</span>
-                <span className="amount">
-                  {ticket.days_until_payment !== null && ticket.days_until_payment < 0 && !ticket.amount_updated && ticket.amount_original
-                    ? <span title="הערכה בלבד">
-                        ~₪{estimateOverdue(ticket.amount_original, Math.abs(ticket.days_until_payment)).toLocaleString()}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                <div>
+                  <p style={{ fontWeight: 500, fontSize: 15, margin: "0 0 4px", color: "#1b2a4a" }}>
+                    {ticket.municipality || "דוח"}
+                  </p>
+                  <p style={{ fontSize: 13, color: "#8893a7", margin: 0, lineHeight: 1.4 }}>
+                    {ticket.violation_description || ""}
+                  </p>
+                </div>
+                <div style={{ textAlign: "left", flexShrink: 0, marginRight: 12 }}>
+                  <p style={{ fontWeight: 500, fontSize: 17, color: "#1b2a4a", margin: 0 }}>
+                    {isOverdue && !ticket.amount_updated ? "~" : ""}{displayAmount.toLocaleString()}₪
+                  </p>
+                  {estimatedExtra && (
+                    <p style={{ fontSize: 11, color: "#A32D2D", margin: "2px 0 0" }}>
+                      +~{estimatedExtra.toLocaleString()}₪ ריבית
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#8893a7" }}>
+                {/* ערעור */}
+                {ticket.status !== "paid" && ticket.days_until_appeal !== null && (
+                  <>
+                    <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <span style={{
+                        width: 6, height: 6, borderRadius: "50%",
+                        background: ticket.days_until_appeal < 0 ? "#888780"
+                          : ticket.days_until_appeal <= 7 ? "#BA7517" : "#1D9E75",
+                      }} />
+                      <span style={{ color: ticket.days_until_appeal < 0 ? "#8893a7"
+                        : ticket.days_until_appeal <= 7 ? "#854F0B" : undefined }}>
+                        {ticket.days_until_appeal < 0 ? "ערעור עבר"
+                          : ticket.days_until_appeal === 0 ? "ערעור היום!"
+                          : `ערעור ${ticket.days_until_appeal} ימים`}
                       </span>
-                    : (ticket.amount_updated || ticket.amount_original)
-                      ? `₪${(ticket.amount_updated || ticket.amount_original).toLocaleString()}`
-                      : ""
-                  }
-                </span>
-              </div>
-              <div className="violation">
-                {ticket.violation_description || ""}
-                {ticket.location ? ` • ${ticket.location}` : ""}
-              </div>
-              <div className="ticket-alerts">
-                {ticket.days_until_payment !== null && ticket.days_until_payment >= 0 && ticket.status !== "paid" && (
-                  <span className={`mini-alert ${ticket.days_until_payment <= 7 ? "alert-urgent" : "alert-ok"}`}>
-                    תשלום: {ticket.days_until_payment === 0 ? "היום!" : `${ticket.days_until_payment} ימים`}
+                    </span>
+                    <span style={{ color: "#ddd" }}>|</span>
+                  </>
+                )}
+
+                {/* תשלום */}
+                {ticket.status !== "paid" && ticket.days_until_payment !== null && !isOverdue && (
+                  <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <span style={{
+                      width: 6, height: 6, borderRadius: "50%",
+                      background: ticket.days_until_payment <= 7 ? "#BA7517" : "#1D9E75",
+                    }} />
+                    <span style={{ color: ticket.days_until_payment <= 7 ? "#854F0B" : undefined }}>
+                      {ticket.days_until_payment === 0 ? "תשלום היום!"
+                        : `תשלום ${ticket.days_until_payment} ימים`}
+                    </span>
                   </span>
                 )}
-                {ticket.days_until_appeal !== null && ticket.days_until_appeal >= 0 && ticket.status !== "paid" && (
-                  <span className={`mini-alert ${ticket.days_until_appeal <= 7 ? "alert-urgent" : "alert-ok"}`}>
-                    ערעור: {ticket.days_until_appeal === 0 ? "היום!" : `${ticket.days_until_appeal} ימים`}
+
+                {/* צובר ריבית */}
+                {isOverdue && (
+                  <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#A32D2D" }} />
+                    <span style={{ color: "#791F1F" }}>
+                      באיחור {Math.abs(ticket.days_until_payment)} ימים · צובר ריבית
+                    </span>
                   </span>
                 )}
-                {ticket.days_until_court !== null && ticket.days_until_court >= 0 && ticket.status !== "paid" && (
-                  <span className={`mini-alert ${ticket.days_until_court <= 7 ? "alert-urgent" : "alert-ok"}`}>
-                    הישפטות: {ticket.days_until_court === 0 ? "היום!" : `${ticket.days_until_court} ימים`}
+
+                {/* שולם */}
+                {ticket.status === "paid" && (
+                  <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#1b4dbc" }} />
+                    <span>שולם</span>
                   </span>
                 )}
-              </div>
-              <div className="bottom-row">
-                <span className={`status-badge ${badge.className}`}>{badge.text}</span>
-                <span className="days-left">{getDaysText(ticket)}</span>
               </div>
             </div>
           );
