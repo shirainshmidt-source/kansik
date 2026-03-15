@@ -2,11 +2,6 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { scanTicket, createTicket } from "../api";
 
-const TICKET_TYPE_LABELS = {
-  police: "דוח משטרה",
-  municipal: "דוח עירייה (חניה)",
-};
-
 const FIELD_LABELS = {
   ticket_type: "סוג דוח",
   municipality: "גורם מנפיק",
