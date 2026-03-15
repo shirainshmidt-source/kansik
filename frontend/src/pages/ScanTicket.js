@@ -107,7 +107,6 @@ function ScanTicket() {
       <input
         type="file"
         accept="image/*"
-        capture="environment"
         ref={frontRef}
         style={{ display: "none" }}
         onChange={handleFrontSelect}
@@ -135,7 +134,6 @@ function ScanTicket() {
       <input
         type="file"
         accept="image/*"
-        capture="environment"
         ref={backRef}
         style={{ display: "none" }}
         onChange={handleBackSelect}
