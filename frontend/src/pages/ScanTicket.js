@@ -2,6 +2,42 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { scanTicket, createTicket } from "../api";
 
+function compressImage(file, maxWidth = 1600, quality = 0.8) {
+  return new Promise((resolve) => {
+    // אם הקובץ קטן מ-1MB, לא צריך כיווץ
+    if (file.size < 1024 * 1024) {
+      resolve(file);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            resolve(new File([blob], file.name, { type: "image/jpeg" }));
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 const FIELD_LABELS = {
   ticket_type: "סוג דוח",
   municipality: "גורם מנפיק",
@@ -65,7 +101,9 @@ function ScanTicket() {
     setScanning(true);
     setError(null);
     try {
-      const result = await scanTicket(frontImage, backImage);
+      const compressedFront = await compressImage(frontImage);
+      const compressedBack = backImage ? await compressImage(backImage) : null;
+      const result = await scanTicket(compressedFront, compressedBack);
       setScanResult(result);
       setEditedData({ ...result });
     } catch (err) {
