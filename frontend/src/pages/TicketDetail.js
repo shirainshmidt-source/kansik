@@ -437,7 +437,7 @@ function TicketDetail() {
                   fontWeight: 600,
                 }}
               >
-                נסח ערעור
+                נסח ערעור עם AI
               </button>
             )}
 
