@@ -11,7 +11,8 @@
       "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" --version)",
       "Bash(\"C:\\\\Program Files \\(x86\\)\\\\GitHub CLI\\\\gh.exe\" --version)",
       "Read(//c/Program Files/**)",
-      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZXhwIjoxNzczODcxNDgwfQ.PDzwwS73MW-_iRUGsyhXrPX9nnXEQdO4r8H1AoZFOe4\" && curl -s -X POST https://kansik.onrender.com/api/tickets -H \"Authorization: Bearer $TOKEN\" -H \"Content-Type: application/json\" -d \"{\\\\\"municipality\\\\\":\\\\\"test\\\\\",\\\\\"ticket_number\\\\\":\\\\\"123\\\\\",\\\\\"amount_original\\\\\":250}\" 2>&1)"
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZXhwIjoxNzczODcxNDgwfQ.PDzwwS73MW-_iRUGsyhXrPX9nnXEQdO4r8H1AoZFOe4\" && curl -s -X POST https://kansik.onrender.com/api/tickets -H \"Authorization: Bearer $TOKEN\" -H \"Content-Type: application/json\" -d \"{\\\\\"municipality\\\\\":\\\\\"test\\\\\",\\\\\"ticket_number\\\\\":\\\\\"123\\\\\",\\\\\"amount_original\\\\\":250}\" 2>&1)",
+      "Bash(grep:*)"
     ]
   }
 }

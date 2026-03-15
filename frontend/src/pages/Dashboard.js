@@ -59,31 +59,6 @@ function Dashboard({ user, onLogout }) {
       return sum + (t.amount_original || 0);
     }, 0);
 
-  function getStatusBadge(ticket) {
-    if (ticket.status === "paid") return { text: "שולם", className: "paid" };
-    if (ticket.status === "appealed") return { text: "בערעור", className: "appealed" };
-    if (ticket.status === "appeal_accepted") return { text: "ערעור התקבל", className: "paid" };
-    // צובר ריבית
-    if (ticket.days_until_payment !== null && ticket.days_until_payment < 0)
-      return { text: "צובר ריבית", className: "overdue" };
-    // דחוף - 7 ימים לפני כל דדליין
-    const isUrgent =
-      (ticket.days_until_payment !== null && ticket.days_until_payment <= 7) ||
-      (ticket.days_until_appeal !== null && ticket.days_until_appeal <= 7) ||
-      (ticket.days_until_court !== null && ticket.days_until_court <= 7);
-    if (isUrgent) return { text: "דחוף", className: "urgent" };
-    return { text: "תקין", className: "ok" };
-  }
-
-  function getDaysText(ticket) {
-    if (ticket.days_until_payment === null) return "";
-    if (ticket.days_until_payment < 0)
-      return `עבר לפני ${Math.abs(ticket.days_until_payment)} ימים`;
-    if (ticket.days_until_payment === 0) return "היום!";
-    if (ticket.days_until_payment === 1) return "מחר";
-    return `${ticket.days_until_payment} ימים`;
-  }
-
   if (loading) {
     return (
       <div className="loading">
