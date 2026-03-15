@@ -1,18 +1,24 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { getTickets } from "../api";
 
 function Dashboard({ user, onLogout }) {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  useEffect(() => {
+  const loadTickets = useCallback(() => {
+    setLoading(true);
     getTickets()
       .then(setTickets)
       .catch(() => setTickets([]))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadTickets();
+  }, [loadTickets, location.key]);
 
   const urgentCount = tickets.filter((t) => {
     if (t.status === "paid" || t.status === "appeal_accepted") return false;
