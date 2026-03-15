@@ -55,7 +55,7 @@ function Appeal() {
 
   async function handleMarkAppealed() {
     await updateTicket(id, { status: "appealed" });
-    navigate("/");
+    window.location.href = "/";
   }
 
   function handleStartOver() {

@@ -93,7 +93,7 @@ function ScanTicket() {
 
   return (
     <div className="scan-page">
-      <button className="back-btn" onClick={() => navigate("/")}>
+      <button className="back-btn" onClick={() => window.location.href = "/"}>
         → חזרה
       </button>
 

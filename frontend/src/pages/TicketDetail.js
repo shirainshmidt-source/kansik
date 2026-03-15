@@ -226,7 +226,7 @@ function TicketDetail() {
   async function handleDelete() {
     if (window.confirm("למחוק את הדוח?")) {
       await deleteTicket(id);
-      navigate("/");
+      window.location.href = "/";
     }
   }
 
@@ -265,7 +265,7 @@ function TicketDetail() {
 
   return (
     <div className="ticket-detail">
-      <button className="back-btn" onClick={() => navigate("/")}>
+      <button className="back-btn" onClick={() => window.location.href = "/"}>
         → חזרה
       </button>
 
