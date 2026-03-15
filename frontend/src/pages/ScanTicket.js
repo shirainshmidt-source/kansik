@@ -69,7 +69,8 @@ function ScanTicket() {
       setScanResult(result);
       setEditedData({ ...result });
     } catch (err) {
-      setError("שגיאה בסריקה. נסי שוב.");
+      const detail = err.response?.data?.detail || err.message || "שגיאה לא ידועה";
+      setError(`שגיאה בסריקה: ${detail}`);
     } finally {
       setScanning(false);
     }
