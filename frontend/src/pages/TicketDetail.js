@@ -405,7 +405,7 @@ function TicketDetail() {
 
           {/* פעולות */}
           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 24 }}>
-            {ticket.status !== "paid" && (
+            {ticket.status !== "paid" ? (
               <button
                 onClick={handleMarkPaid}
                 style={{
@@ -420,6 +420,25 @@ function TicketDetail() {
                 }}
               >
                 סמן כשולם
+              </button>
+            ) : (
+              <button
+                onClick={async () => {
+                  const updated = await updateTicket(id, { status: "pending" });
+                  setTicket(updated);
+                }}
+                style={{
+                  width: "100%",
+                  padding: "13px 24px",
+                  background: "white",
+                  color: "#8893a7",
+                  border: "1px solid #e8ecf2",
+                  borderRadius: 10,
+                  fontSize: "0.95rem",
+                  fontWeight: 500,
+                }}
+              >
+                בטל סימון שולם
               </button>
             )}
 
