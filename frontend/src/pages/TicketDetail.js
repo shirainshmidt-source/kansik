@@ -404,24 +404,57 @@ function TicketDetail() {
           </div>
 
           {/* פעולות */}
-          <div className="actions" style={{ marginTop: 16 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 24 }}>
             {ticket.status !== "paid" && (
-              <button className="btn-success" onClick={handleMarkPaid}>
+              <button
+                onClick={handleMarkPaid}
+                style={{
+                  width: "100%",
+                  padding: "13px 24px",
+                  background: "white",
+                  color: "#1b2a4a",
+                  border: "1px solid #e8ecf2",
+                  borderRadius: 10,
+                  fontSize: "0.95rem",
+                  fontWeight: 600,
+                }}
+              >
                 סמן כשולם
               </button>
             )}
 
             {ticket.status !== "paid" && (ticket.days_until_appeal === null || ticket.days_until_appeal >= 0) && (
               <button
-                className="btn-secondary"
                 onClick={() => navigate(`/ticket/${id}/appeal`)}
+                style={{
+                  width: "100%",
+                  padding: "13px 24px",
+                  background: "white",
+                  color: "#1b2a4a",
+                  border: "1px solid #e8ecf2",
+                  borderRadius: 10,
+                  fontSize: "0.95rem",
+                  fontWeight: 600,
+                }}
               >
-                נסח ערעור עם AI
+                נסח ערעור
               </button>
             )}
 
-            <button className="btn-danger" onClick={handleDelete}>
-              מחק
+            <button
+              onClick={handleDelete}
+              style={{
+                width: "100%",
+                padding: "13px 24px",
+                background: "white",
+                color: "#8893a7",
+                border: "1px solid #e8ecf2",
+                borderRadius: 10,
+                fontSize: "0.95rem",
+                fontWeight: 500,
+              }}
+            >
+              מחק דוח
             </button>
           </div>
         </>
