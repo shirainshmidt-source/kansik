@@ -1,0 +1,12 @@
+.env
+backend/.env
+__pycache__/
+*.pyc
+.venv/
+*.db
+node_modules/
+frontend/build/
+*.jpeg
+*.jpg
+*.png
+.claude/

@@ -1,0 +1,536 @@
+/* Layout */
+.app {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #1b4dbc;
+}
+
+/* Dashboard */
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: white;
+  border: 1px solid #e8ecf2;
+  border-radius: 14px;
+  padding: 18px 14px;
+  text-align: center;
+}
+
+.stat-card .number {
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #1b2a4a;
+}
+
+.stat-card .label {
+  font-size: 0.72rem;
+  color: #8893a7;
+  margin-top: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Ticket Card */
+.ticket-card {
+  background: white;
+  border: 1px solid #e8ecf2;
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ticket-card:hover {
+  border-color: #c5cdd9;
+  box-shadow: 0 2px 12px rgba(27, 42, 74, 0.06);
+}
+
+.ticket-card .top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.ticket-card .municipality {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1b2a4a;
+}
+
+.ticket-card .amount {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #dc3545;
+  letter-spacing: -0.02em;
+}
+
+.ticket-card .violation {
+  color: #8893a7;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+.ticket-card .bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.urgent {
+  background: #fef1f1;
+  color: #dc3545;
+}
+
+.status-badge.ok {
+  background: #eefbf3;
+  color: #0d8a3f;
+}
+
+.status-badge.overdue {
+  background: #fff8eb;
+  color: #c27a00;
+}
+
+.status-badge.paid {
+  background: #eef2ff;
+  color: #1b4dbc;
+}
+
+.status-badge.appealed {
+  background: #fff8eb;
+  color: #c27a00;
+}
+
+.days-left {
+  font-size: 0.8rem;
+  color: #8893a7;
+}
+
+/* Scan Page */
+.scan-page {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.upload-area {
+  border: 2px dashed #d0d6e0;
+  border-radius: 16px;
+  padding: 50px 20px;
+  margin: 20px 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: white;
+}
+
+.upload-area:hover {
+  border-color: #1b4dbc;
+  background: #f5f8ff;
+}
+
+.upload-area.has-image {
+  border-style: solid;
+  border-color: #1b4dbc;
+  padding: 16px;
+}
+
+.upload-area img {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 10px;
+}
+
+.upload-area .icon {
+  font-size: 2.5rem;
+  opacity: 0.35;
+}
+
+.upload-area p {
+  color: #8893a7;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+/* Scan Results */
+.scan-results {
+  text-align: right;
+  margin: 24px 0;
+}
+
+.scan-results h3 {
+  margin-bottom: 16px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #1b2a4a;
+}
+
+.field-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 0;
+  border-bottom: 1px solid #eef0f4;
+}
+
+.field-row .label {
+  font-weight: 600;
+  color: #8893a7;
+  font-size: 0.9rem;
+}
+
+.field-row .value {
+  color: #1b2a4a;
+  font-size: 0.9rem;
+}
+
+/* Buttons */
+.btn-primary {
+  background: #1b4dbc;
+  color: white;
+  width: 100%;
+}
+
+.btn-primary:hover {
+  background: #153f9e;
+  box-shadow: 0 4px 16px rgba(27, 77, 188, 0.25);
+}
+
+.btn-secondary {
+  background: #eef2ff;
+  color: #1b4dbc;
+}
+
+.btn-secondary:hover {
+  background: #e0e8ff;
+}
+
+.btn-danger {
+  background: #fef1f1;
+  color: #dc3545;
+}
+
+.btn-danger:hover {
+  background: #fce0e0;
+}
+
+.btn-success {
+  background: #eefbf3;
+  color: #0d8a3f;
+  width: 100%;
+}
+
+.btn-success:hover {
+  background: #dff5e8;
+}
+
+.btn-scan {
+  background: #1b4dbc;
+  color: white;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(27, 77, 188, 0.3);
+}
+
+.btn-scan:hover {
+  background: #153f9e;
+  box-shadow: 0 6px 28px rgba(27, 77, 188, 0.4);
+}
+
+/* Alerts */
+.alerts-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* Mini alerts in dashboard cards */
+.ticket-alerts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.mini-alert {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.alert-ok {
+  background: #eefbf3;
+  color: #0d8a3f;
+}
+
+.alert-urgent {
+  background: #fef1f1;
+  color: #dc3545;
+}
+
+.alert-overdue {
+  background: #fff8eb;
+  color: #c27a00;
+}
+
+/* Ticket Detail */
+.ticket-detail {
+  padding: 20px 0;
+}
+
+.ticket-detail .actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.back-btn {
+  background: none;
+  color: #1b4dbc;
+  padding: 8px 0;
+  font-size: 0.95rem;
+}
+
+.back-btn:hover {
+  box-shadow: none;
+  transform: none;
+  color: #2d60d0;
+}
+
+/* Appeal Page */
+.appeal-page {
+  padding: 20px 0;
+}
+
+.appeal-input {
+  margin: 20px 0;
+}
+
+.appeal-input textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.appeal-result {
+  background: white;
+  border: 1px solid #e8ecf2;
+  border-radius: 14px;
+  padding: 20px;
+  margin: 20px 0;
+  white-space: pre-wrap;
+  line-height: 1.7;
+  text-align: right;
+  color: #3d4f6f;
+}
+
+.appeal-result-edit {
+  width: 100%;
+  min-height: 250px;
+  background: white;
+  border: 1.5px solid #1b4dbc;
+  border-radius: 14px;
+  padding: 20px;
+  margin: 0 0 20px 0;
+  line-height: 1.7;
+  text-align: right;
+  font-size: 0.95rem;
+  resize: vertical;
+  font-family: inherit;
+  color: #1b2a4a;
+}
+
+.appeal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.revision-input {
+  margin-top: 16px;
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 60px;
+  color: #8893a7;
+}
+
+.spinner {
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e8ecf2;
+  border-top-color: #1b4dbc;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: #8893a7;
+}
+
+.empty-state .icon {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+/* FAB */
+.fab-container {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Header User */
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-name {
+  font-size: 0.85rem;
+  color: #8893a7;
+  font-weight: 500;
+}
+
+.btn-logout {
+  background: #eef2ff;
+  color: #1b4dbc;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  border-radius: 8px;
+}
+
+.btn-logout:hover {
+  background: #e0e8ff;
+  transform: none;
+}
+
+/* Auth Pages */
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: white;
+  border: 1px solid #e8ecf2;
+  border-radius: 18px;
+  padding: 40px 32px;
+  text-align: center;
+}
+
+.auth-logo {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #1b4dbc;
+  margin-bottom: 8px;
+}
+
+.auth-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #8893a7;
+  margin-bottom: 28px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-field {
+  text-align: right;
+}
+
+.auth-field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1b2a4a;
+  margin-bottom: 6px;
+}
+
+.auth-error {
+  color: #dc3545;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 8px;
+  background: #fef1f1;
+  border-radius: 8px;
+}
+
+.auth-switch {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #8893a7;
+}
+
+.auth-switch span {
+  color: #1b4dbc;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-switch span:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(where python:*)",
+      "Bash(curl:*)",
+      "Bash(taskkill:*)",
+      "Bash(powershell.exe -Command \"Remove-Item -Force 'C:\\\\Users\\\\shira\\\\Documents\\\\אפליקציה דוחות\\\\backend\\\\kansik.db'\" 2>&1)",
+      "Bash(where gh:*)",
+      "Bash(winget install:*)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" --version)",
+      "Bash(\"C:\\\\Program Files \\(x86\\)\\\\GitHub CLI\\\\gh.exe\" --version)",
+      "Read(//c/Program Files/**)"
+    ]
+  }
+}
