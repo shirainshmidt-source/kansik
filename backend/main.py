@@ -558,6 +558,8 @@ async def get_today_reminders(
 
     for ticket in tickets:
         label = ticket.municipality or f"דוח #{ticket.id}"
+        amount = ticket.amount_original or 0
+        amount_str = f"₪{int(amount)}"
 
         # בדיקת תזכורות ערעור
         appeal_deadline = estimate_appeal_deadline(ticket)
@@ -565,9 +567,13 @@ async def get_today_reminders(
             days_until = (appeal_deadline - today).days
             if days_until >= 0 and days_until in appeal_days:
                 if days_until == 0:
-                    msg = f"היום יום אחרון לערעור על {label}!"
+                    msg = f"היום יום אחרון לערער על דוח {label} ({amount_str}). ערעור יכול לבטל את הדוח לגמרי!"
+                elif days_until == 1:
+                    msg = f"מחר יום אחרון לערער על דוח {label} ({amount_str}). מומלץ לפעול היום."
+                elif days_until == 3:
+                    msg = f"נשארו 3 ימים לערער על דוח {label} ({amount_str}). אל תפספסי את ההזדמנות לביטול."
                 else:
-                    msg = f"נשארו {days_until} ימים לערעור על {label}"
+                    msg = f"נשארו {days_until} ימים לערער על דוח {label} ({amount_str}). ערעור יכול לחסוך לך את כל הסכום."
                 items.append(TodayReminderItem(
                     ticket_id=ticket.id,
                     ticket_label=label,
@@ -581,9 +587,13 @@ async def get_today_reminders(
             days_until = (ticket.payment_deadline - today).days
             if days_until >= 0 and days_until in payment_days:
                 if days_until == 0:
-                    msg = f"היום יום אחרון לתשלום {label}!"
+                    msg = f"היום יום אחרון לשלם את דוח {label} ({amount_str}) לפני תוספת קנס. מחר הסכום יעלה!"
+                elif days_until == 1:
+                    msg = f"מחר יום אחרון לשלם את דוח {label} ({amount_str}) בלי ריבית. כדאי לטפל היום."
+                elif days_until == 3:
+                    msg = f"נשארו 3 ימים לשלם את דוח {label} ({amount_str}) לפני שהסכום מתחיל לעלות."
                 else:
-                    msg = f"נשארו {days_until} ימים לתשלום {label}"
+                    msg = f"נשארו {days_until} ימים לשלם את דוח {label} ({amount_str}) לפני תוספת ריבית."
                 items.append(TodayReminderItem(
                     ticket_id=ticket.id,
                     ticket_label=label,
@@ -604,11 +614,13 @@ async def get_today_reminders(
     for reminder in manual_reminders:
         ticket = await db.get(Ticket, reminder.ticket_id)
         label = (ticket.municipality if ticket else None) or f"דוח #{reminder.ticket_id}"
+        amount = (ticket.amount_original if ticket else 0) or 0
+        amount_str = f"₪{int(amount)}"
         items.append(TodayReminderItem(
             ticket_id=reminder.ticket_id,
             ticket_label=label,
             reminder_type="manual",
-            message=f"תזכורת: {label}",
+            message=f"תזכורת לטפל בדוח {label} ({amount_str}). ככל שממתינים יותר, הסכום גדל.",
         ))
         # סמן כנשלח
         reminder.sent = True
