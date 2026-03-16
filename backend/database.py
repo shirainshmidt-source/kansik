@@ -13,20 +13,30 @@ async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit
 
 async def init_db():
     async with engine.begin() as conn:
-        # יוצר טבלאות חדשות אם לא קיימות, בלי למחוק ישנות
-        await conn.run_sync(Base.metadata.create_all)
-    # בדיקה שכל הטבלאות תקינות
-    try:
-        async with async_session() as session:
-            from sqlalchemy import text
-            await session.execute(text("SELECT 1 FROM users LIMIT 1"))
-            await session.execute(text("SELECT 1 FROM tickets LIMIT 1"))
-            await session.execute(text("SELECT 1 FROM reminders LIMIT 1"))
-    except Exception:
-        # אם טבלה חסרה או שבורה - יוצר הכל מחדש
-        async with engine.begin() as conn:
+        # בדיקה שכל הטבלאות והעמודות קיימות
+        try:
+            from sqlalchemy import text, inspect
+
+            def check_schema(connection):
+                inspector = inspect(connection)
+                tables = inspector.get_table_names()
+                # בדוק שכל הטבלאות קיימות
+                if not all(t in tables for t in ["users", "tickets", "reminders"]):
+                    return False
+                # בדוק שעמודת reminder_settings קיימת ב-users
+                user_cols = [c["name"] for c in inspector.get_columns("users")]
+                if "reminder_settings" not in user_cols:
+                    return False
+                return True
+
+            schema_ok = await conn.run_sync(check_schema)
+        except Exception:
+            schema_ok = False
+
+        if not schema_ok:
             await conn.run_sync(Base.metadata.drop_all)
-            await conn.run_sync(Base.metadata.create_all)
+
+        await conn.run_sync(Base.metadata.create_all)
 
 
 async def get_db():
