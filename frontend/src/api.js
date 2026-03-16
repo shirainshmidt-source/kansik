@@ -105,3 +105,36 @@ export async function reviseAppeal(ticketId, appealText, correction) {
   });
   return data;
 }
+
+// ──── הגדרות תזכורות ────
+
+export async function getReminderSettings() {
+  const { data } = await api.get("/settings/reminders");
+  return data;
+}
+
+export async function updateReminderSettings(settings) {
+  const { data } = await api.put("/settings/reminders", settings);
+  return data;
+}
+
+// ──── תזכורות ידניות ────
+
+export async function getTicketReminders(ticketId) {
+  const { data } = await api.get(`/tickets/${ticketId}/reminders`);
+  return data;
+}
+
+export async function createTicketReminder(ticketId, dateStr) {
+  const { data } = await api.post(`/tickets/${ticketId}/reminders`, { date: dateStr });
+  return data;
+}
+
+export async function deleteReminder(reminderId) {
+  await api.delete(`/reminders/${reminderId}`);
+}
+
+export async function getTodayReminders() {
+  const { data } = await api.get("/reminders/today");
+  return data;
+}

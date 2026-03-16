@@ -8,6 +8,7 @@ import TicketDetail from "./pages/TicketDetail";
 import Appeal from "./pages/Appeal";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Settings from "./pages/Settings";
 
 function App() {
   const [user, setUser] = useState(getStoredUser);
@@ -39,6 +40,7 @@ function App() {
         <Route path="/scan" element={<ScanTicket />} />
         <Route path="/ticket/:id" element={<TicketDetail />} />
         <Route path="/ticket/:id/appeal" element={<Appeal />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>

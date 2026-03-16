@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getTicket, updateTicket, deleteTicket } from "../api";
+import { getTicket, updateTicket, deleteTicket, getTicketReminders, createTicketReminder, deleteReminder } from "../api";
 
 function DeadlineAlert({ label, days }) {
   if (days === null || days === undefined) return null;
@@ -210,6 +210,9 @@ function TicketDetail() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editData, setEditData] = useState({});
+  const [showReminder, setShowReminder] = useState(false);
+  const [reminders, setReminders] = useState([]);
+  const [reminderDate, setReminderDate] = useState("");
 
   useEffect(() => {
     getTicket(id)
@@ -237,6 +240,35 @@ function TicketDetail() {
     });
     setEditData(data);
     setEditing(true);
+  }
+
+  async function loadReminders() {
+    try {
+      const data = await getTicketReminders(id);
+      setReminders(data);
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  async function handleAddReminder() {
+    if (!reminderDate) return;
+    try {
+      await createTicketReminder(id, reminderDate);
+      setReminderDate("");
+      loadReminders();
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  async function handleDeleteReminder(reminderId) {
+    try {
+      await deleteReminder(reminderId);
+      loadReminders();
+    } catch (e) {
+      // ignore
+    }
   }
 
   async function saveEditing() {
@@ -458,6 +490,114 @@ function TicketDetail() {
               >
                 נסח ערעור עם AI
               </button>
+            )}
+
+            {/* כפתור תזכורת לדוחות באיחור */}
+            {ticket.days_until_payment !== null && ticket.days_until_payment < 0 && (
+              <>
+                <button
+                  onClick={() => {
+                    setShowReminder(!showReminder);
+                    if (!showReminder) loadReminders();
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: "13px 24px",
+                    background: "white",
+                    color: "#1b2a4a",
+                    border: "1px solid #e8ecf2",
+                    borderRadius: 10,
+                    fontSize: "0.95rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  הזכר לי
+                </button>
+
+                {showReminder && (
+                  <div style={{
+                    background: "white",
+                    border: "1px solid #e8ecf2",
+                    borderRadius: 12,
+                    padding: 16,
+                  }}>
+                    <p style={{ fontSize: "0.85rem", fontWeight: 600, color: "#1b2a4a", margin: "0 0 12px" }}>
+                      הוספת תזכורת
+                    </p>
+
+                    <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                      <input
+                        type="date"
+                        value={reminderDate}
+                        onChange={(e) => setReminderDate(e.target.value)}
+                        style={{
+                          flex: 1,
+                          padding: "10px 12px",
+                          border: "1px solid #e8ecf2",
+                          borderRadius: 8,
+                          fontSize: "0.85rem",
+                          direction: "ltr",
+                        }}
+                      />
+                      <button
+                        onClick={handleAddReminder}
+                        disabled={!reminderDate}
+                        style={{
+                          padding: "10px 18px",
+                          background: "#185FA5",
+                          color: "white",
+                          border: "none",
+                          borderRadius: 8,
+                          fontSize: "0.85rem",
+                          fontWeight: 600,
+                          cursor: reminderDate ? "pointer" : "not-allowed",
+                          opacity: reminderDate ? 1 : 0.5,
+                        }}
+                      >
+                        הוסף
+                      </button>
+                    </div>
+
+                    {reminders.length > 0 && (
+                      <div>
+                        <p style={{ fontSize: "0.8rem", color: "#8893a7", margin: "0 0 8px" }}>
+                          תזכורות קיימות:
+                        </p>
+                        {reminders.map((r) => (
+                          <div
+                            key={r.id}
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              padding: "8px 0",
+                              borderBottom: "1px solid #f0f2f5",
+                            }}
+                          >
+                            <span style={{ fontSize: "0.85rem", color: "#1b2a4a", direction: "ltr" }}>
+                              {r.remind_date}
+                            </span>
+                            <button
+                              onClick={() => handleDeleteReminder(r.id)}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                color: "#dc3545",
+                                fontSize: "0.9rem",
+                                cursor: "pointer",
+                                padding: "2px 8px",
+                                fontWeight: 600,
+                              }}
+                            >
+                              X
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
             )}
 
             <button

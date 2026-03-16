@@ -2,11 +2,12 @@
 קנסיק - מודלים של בסיס הנתונים
 """
 
-from sqlalchemy import Column, Integer, String, Float, Date, DateTime, Enum as SQLEnum, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Date, DateTime, Boolean, Enum as SQLEnum, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 from datetime import datetime, date
 from enum import Enum
 from pydantic import BaseModel
+from typing import Optional
 
 Base = declarative_base()
 
@@ -28,9 +29,11 @@ class User(Base):
     email = Column(String, unique=True, nullable=False, index=True)
     password_hash = Column(String, nullable=False)
     name = Column(String, nullable=False)
+    reminder_settings = Column(String, nullable=True)  # JSON: {"appeal": [7,3,1,0], "payment": [7,3,1,0]}
     created_at = Column(DateTime, default=datetime.utcnow)
 
     tickets = relationship("Ticket", back_populates="user")
+    reminders = relationship("Reminder", back_populates="user")
 
 
 class Ticket(Base):
@@ -61,6 +64,21 @@ class Ticket(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="tickets")
+    reminders = relationship("Reminder", back_populates="ticket", cascade="all, delete-orphan")
+
+
+class Reminder(Base):
+    __tablename__ = "reminders"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    ticket_id = Column(Integer, ForeignKey("tickets.id"), nullable=False)
+    remind_date = Column(Date, nullable=False)
+    sent = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="reminders")
+    ticket = relationship("Ticket", back_populates="reminders")
 
 
 # Pydantic schemas
@@ -175,3 +193,33 @@ class AppealResponse(BaseModel):
 class AppealRevisionRequest(BaseModel):
     appeal_text: str
     correction: str
+
+
+# Reminder schemas
+
+class ReminderSettingsSchema(BaseModel):
+    appeal: list[int] = [7, 3, 1, 0]
+    payment: list[int] = [7, 3, 1, 0]
+
+
+class ReminderCreate(BaseModel):
+    date: str  # YYYY-MM-DD
+
+
+class ReminderResponse(BaseModel):
+    id: int
+    ticket_id: int
+    remind_date: date
+    sent: bool
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class TodayReminderItem(BaseModel):
+    ticket_id: int
+    ticket_label: str
+    reminder_type: str  # "appeal", "payment", "manual"
+    days_until: Optional[int] = None
+    message: str

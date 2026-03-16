@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getTickets } from "../api";
+import { getTickets, getTodayReminders } from "../api";
 
 function estimateOverdue(original, daysOverdue) {
   let amount = original * 1.5;
@@ -116,6 +116,40 @@ function Dashboard({ user, onLogout }) {
     };
   }, []);
 
+  // בקשת הרשאת התראות ובדיקת תזכורות להיום
+  useEffect(() => {
+    async function checkNotifications() {
+      if (!("Notification" in window)) return;
+
+      let permission = Notification.permission;
+      if (permission === "default") {
+        permission = await Notification.requestPermission();
+      }
+      if (permission !== "granted") return;
+
+      // בדיקה שלא שלחנו כבר היום
+      const todayKey = "kansik_notified_" + new Date().toISOString().slice(0, 10);
+      if (sessionStorage.getItem(todayKey)) return;
+
+      try {
+        const reminders = await getTodayReminders();
+        reminders.forEach((r) => {
+          new Notification("קנסיק - תזכורת", {
+            body: r.message,
+            icon: "/favicon.ico",
+            dir: "rtl",
+          });
+        });
+        if (reminders.length > 0) {
+          sessionStorage.setItem(todayKey, "1");
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    checkNotifications();
+  }, []);
+
   // מיון לקטגוריות
   const activeTickets = tickets.filter((t) => t.status !== "paid" && t.status !== "appeal_accepted");
 
@@ -155,14 +189,22 @@ function Dashboard({ user, onLogout }) {
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 0 20px" }}>
         <span style={{ fontWeight: 500, fontSize: 20, color: "#1b2a4a" }}>קנסיק</span>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }} onClick={onLogout}>
-          <span style={{ fontSize: 13, color: "#888" }}>{user?.name}</span>
-          <div style={{
-            width: 32, height: 32, borderRadius: "50%", background: "#185FA5", color: "white",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 14, fontWeight: 600, cursor: "pointer",
-          }}>
-            {firstName}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span
+            onClick={() => navigate("/settings")}
+            style={{ fontSize: 13, color: "#185FA5", cursor: "pointer", fontWeight: 500 }}
+          >
+            הגדרות
+          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }} onClick={onLogout}>
+            <span style={{ fontSize: 13, color: "#888" }}>{user?.name}</span>
+            <div style={{
+              width: 32, height: 32, borderRadius: "50%", background: "#185FA5", color: "white",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 14, fontWeight: 600, cursor: "pointer",
+            }}>
+              {firstName}
+            </div>
           </div>
         </div>
       </div>

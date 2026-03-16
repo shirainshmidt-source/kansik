@@ -18,10 +18,12 @@ load_dotenv()
 
 from database import init_db, get_db
 from models import (
-    User, Ticket, TicketStatus, TicketScan, TicketResponse, TicketUpdate,
+    User, Ticket, Reminder, TicketStatus, TicketScan, TicketResponse, TicketUpdate,
     AppealRequest, AppealResponse, AppealRevisionRequest,
     UserRegister, UserLogin, TokenResponse, UserResponse,
+    ReminderSettingsSchema, ReminderCreate, ReminderResponse, TodayReminderItem,
 )
+import json
 from ai_service import scan_ticket_image, draft_appeal, revise_appeal
 
 
@@ -429,3 +431,187 @@ async def revise_appeal_endpoint(
 
     revised_text = revise_appeal(request.appeal_text, request.correction)
     return AppealResponse(appeal_text=revised_text)
+
+
+# ──────────────────────────────────────
+#  הגדרות תזכורות
+# ──────────────────────────────────────
+
+DEFAULT_REMINDER_SETTINGS = {"appeal": [7, 3, 1, 0], "payment": [7, 3, 1, 0]}
+
+
+@app.get("/api/settings/reminders", response_model=ReminderSettingsSchema)
+async def get_reminder_settings(current_user: User = Depends(get_current_user)):
+    """מחזיר הגדרות תזכורות של המשתמש"""
+    if current_user.reminder_settings:
+        return ReminderSettingsSchema(**json.loads(current_user.reminder_settings))
+    return ReminderSettingsSchema(**DEFAULT_REMINDER_SETTINGS)
+
+
+@app.put("/api/settings/reminders", response_model=ReminderSettingsSchema)
+async def update_reminder_settings(
+    settings: ReminderSettingsSchema,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """עדכון הגדרות תזכורות"""
+    current_user.reminder_settings = json.dumps(settings.model_dump())
+    await db.commit()
+    return settings
+
+
+# ──────────────────────────────────────
+#  תזכורות ידניות לדוחות
+# ──────────────────────────────────────
+
+@app.get("/api/tickets/{ticket_id}/reminders", response_model=list[ReminderResponse])
+async def get_ticket_reminders(
+    ticket_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """מחזיר תזכורות של דוח ספציפי"""
+    ticket = await db.get(Ticket, ticket_id)
+    if not ticket or ticket.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="דוח לא נמצא")
+
+    result = await db.execute(
+        select(Reminder)
+        .where(Reminder.ticket_id == ticket_id, Reminder.user_id == current_user.id)
+        .order_by(Reminder.remind_date)
+    )
+    return result.scalars().all()
+
+
+@app.post("/api/tickets/{ticket_id}/reminders", response_model=ReminderResponse)
+async def create_ticket_reminder(
+    ticket_id: int,
+    data: ReminderCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """הוספת תזכורת ידנית לדוח"""
+    ticket = await db.get(Ticket, ticket_id)
+    if not ticket or ticket.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="דוח לא נמצא")
+
+    remind_date = parse_date(data.date)
+    if not remind_date:
+        raise HTTPException(status_code=400, detail="תאריך לא תקין")
+
+    reminder = Reminder(
+        user_id=current_user.id,
+        ticket_id=ticket_id,
+        remind_date=remind_date,
+    )
+    db.add(reminder)
+    await db.commit()
+    await db.refresh(reminder)
+    return reminder
+
+
+@app.delete("/api/reminders/{reminder_id}")
+async def delete_reminder(
+    reminder_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """מחיקת תזכורת"""
+    reminder = await db.get(Reminder, reminder_id)
+    if not reminder or reminder.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="תזכורת לא נמצאה")
+
+    await db.delete(reminder)
+    await db.commit()
+    return {"message": "התזכורת נמחקה"}
+
+
+# ──────────────────────────────────────
+#  תזכורות להיום
+# ──────────────────────────────────────
+
+@app.get("/api/reminders/today", response_model=list[TodayReminderItem])
+async def get_today_reminders(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """מחזיר את כל התזכורות שצריכות להיות מוצגות היום"""
+    today = date.today()
+    items = []
+
+    # 1. הגדרות תזכורות אוטומטיות
+    if current_user.reminder_settings:
+        settings = json.loads(current_user.reminder_settings)
+    else:
+        settings = DEFAULT_REMINDER_SETTINGS
+
+    appeal_days = settings.get("appeal", [])
+    payment_days = settings.get("payment", [])
+
+    # טען את כל הדוחות הפעילים
+    result = await db.execute(
+        select(Ticket)
+        .where(Ticket.user_id == current_user.id)
+        .where(Ticket.status.notin_(["paid", "appeal_accepted"]))
+    )
+    tickets = result.scalars().all()
+
+    for ticket in tickets:
+        label = ticket.municipality or f"דוח #{ticket.id}"
+
+        # בדיקת תזכורות ערעור
+        appeal_deadline = estimate_appeal_deadline(ticket)
+        if appeal_deadline:
+            days_until = (appeal_deadline - today).days
+            if days_until >= 0 and days_until in appeal_days:
+                if days_until == 0:
+                    msg = f"היום יום אחרון לערעור על {label}!"
+                else:
+                    msg = f"נשארו {days_until} ימים לערעור על {label}"
+                items.append(TodayReminderItem(
+                    ticket_id=ticket.id,
+                    ticket_label=label,
+                    reminder_type="appeal",
+                    days_until=days_until,
+                    message=msg,
+                ))
+
+        # בדיקת תזכורות תשלום
+        if ticket.payment_deadline:
+            days_until = (ticket.payment_deadline - today).days
+            if days_until >= 0 and days_until in payment_days:
+                if days_until == 0:
+                    msg = f"היום יום אחרון לתשלום {label}!"
+                else:
+                    msg = f"נשארו {days_until} ימים לתשלום {label}"
+                items.append(TodayReminderItem(
+                    ticket_id=ticket.id,
+                    ticket_label=label,
+                    reminder_type="payment",
+                    days_until=days_until,
+                    message=msg,
+                ))
+
+    # 2. תזכורות ידניות להיום
+    result = await db.execute(
+        select(Reminder)
+        .where(Reminder.user_id == current_user.id)
+        .where(Reminder.remind_date == today)
+        .where(Reminder.sent == False)
+    )
+    manual_reminders = result.scalars().all()
+
+    for reminder in manual_reminders:
+        ticket = await db.get(Ticket, reminder.ticket_id)
+        label = (ticket.municipality if ticket else None) or f"דוח #{reminder.ticket_id}"
+        items.append(TodayReminderItem(
+            ticket_id=reminder.ticket_id,
+            ticket_label=label,
+            reminder_type="manual",
+            message=f"תזכורת: {label}",
+        ))
+        # סמן כנשלח
+        reminder.sent = True
+
+    await db.commit()
+    return items
