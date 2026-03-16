@@ -122,7 +122,7 @@ function ScanTicket() {
     setSaving(true);
     try {
       const ticket = await createTicket(editedData);
-      navigate(`/ticket/${ticket.id}`);
+      window.location.href = `/ticket/${ticket.id}`;
     } catch (err) {
       setError("שגיאה בשמירה. נסי שוב.");
     } finally {
