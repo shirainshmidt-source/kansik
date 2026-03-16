@@ -213,6 +213,7 @@ function TicketDetail() {
   const [showReminder, setShowReminder] = useState(false);
   const [reminders, setReminders] = useState([]);
   const [reminderDate, setReminderDate] = useState("");
+  const [savedMsg, setSavedMsg] = useState("");
 
   useEffect(() => {
     getTicket(id)
@@ -224,6 +225,8 @@ function TicketDetail() {
   async function handleMarkPaid() {
     const updated = await updateTicket(id, { status: "paid" });
     setTicket(updated);
+    setSavedMsg("סומן כשולם");
+    setTimeout(() => setSavedMsg(""), 3000);
   }
 
   async function handleDelete() {
@@ -280,6 +283,8 @@ function TicketDetail() {
     const updated = await updateTicket(id, updates);
     setTicket(updated);
     setEditing(false);
+    setSavedMsg("השינויים נשמרו");
+    setTimeout(() => setSavedMsg(""), 3000);
   }
 
   if (loading) {
@@ -309,6 +314,22 @@ function TicketDetail() {
           </button>
         )}
       </div>
+
+      {savedMsg && (
+        <div style={{
+          color: "#0d8a3f",
+          background: "#eefbf3",
+          border: "1px solid #b6e5c8",
+          borderRadius: 10,
+          padding: "10px",
+          marginBottom: 12,
+          fontSize: "0.85rem",
+          fontWeight: 600,
+          textAlign: "center",
+        }}>
+          {savedMsg}
+        </div>
+      )}
 
       {/* סכום */}
       <AmountDisplay ticket={ticket} />

@@ -48,6 +48,9 @@ function Settings() {
     try {
       await updateReminderSettings({ appeal: appealDays, payment: paymentDays });
       setSaved(true);
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1000);
     } catch (e) {
       // ignore
     }
@@ -209,9 +212,19 @@ function Settings() {
       </button>
 
       {saved && (
-        <p style={{ textAlign: "center", color: "#0d8a3f", fontSize: "0.85rem", marginTop: 12 }}>
+        <div style={{
+          textAlign: "center",
+          color: "#0d8a3f",
+          background: "#eefbf3",
+          border: "1px solid #b6e5c8",
+          borderRadius: 10,
+          padding: "12px",
+          marginTop: 12,
+          fontSize: "0.9rem",
+          fontWeight: 600,
+        }}>
           ההגדרות נשמרו בהצלחה
-        </p>
+        </div>
       )}
     </div>
   );
